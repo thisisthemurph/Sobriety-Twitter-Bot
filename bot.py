@@ -6,7 +6,12 @@ from config import create_api, get_config
 from chip import Chip
 from quote import random_quote
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    filename="logger.log",
+    filemode="w",
+    format="%(asctime)s,%(levelname)s,\"%(message)s\""
+)
 logger = logging.getLogger()
 
 class TweetStreamListener(tweepy.StreamListener):
@@ -18,10 +23,17 @@ class TweetStreamListener(tweepy.StreamListener):
         logger.info(f"Tweeting to {tweet.user.name} ({tweet.user.screen_name})")
 
         if tweet.in_reply_to_status_id is not None or tweet.user.id == self.me.id:
-            logger.info("Ignoring reply to or own tweet")
             return
+        
+        try:
+            tweet.retweeted_status
+            return
+        except AttributeError:
+            pass
 
         days = self.get_duration_in_days(tweet)
+        logger.info(f"Tweet: {tweet.text}")
+        logger.info(f"Days: {days}")
         self.like_tweet(tweet)
         self.reply_to_tweet(tweet, days)
 
@@ -63,15 +75,11 @@ class TweetStreamListener(tweepy.StreamListener):
         if not tweet.favorited:
             try:
                 tweet.favorite()
+                logger.info(f"Liked tweet ({tweet.id}) by {tweet.user.screen_name}")
             except Exception:
-                logger.error("Error favouriting tweet")
+                logger.error(f"Cannot like tweet ({tweet.id}) for {tweet.user.screen_name}")
 
     def reply_to_tweet(self, tweet, days=None):
-        # TODO Remove - only for testing
-        test_accounts = get_config()["TESTING_ACCOUNTS"]
-        if tweet.user.screen_name not in test_accounts:
-            return
-
         media_ids = []
         if days is not None:
             chip = Chip(days)
@@ -83,6 +91,8 @@ class TweetStreamListener(tweepy.StreamListener):
             media_ids=media_ids,
             in_reply_to_status_id=tweet.id
         )
+
+        logger.info(f"Tweet sent: in_reply_to_status_id={tweet.id}, screen_name={tweet.user.screen_name}")
 
         if days is not None:
             chip.delete()
