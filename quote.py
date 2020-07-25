@@ -2,7 +2,7 @@ import random
 
 quotes = [
     "It does not matter how slowly you go as long as you do not stop — Confucius",
-    "My recovery must com first so that everything I live in life does not come last",
+    "My recovery must com first so that everything I love in life does not come last",
     "Recovery is about progression, not perfection",
     "If you find yourself in a hole, the first thing to do is stop digging",
     "It’s gonna get harder before it gets easier. But it will get better, you just gotta make it through the hard stuff first",
