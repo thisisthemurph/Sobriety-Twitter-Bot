@@ -4,6 +4,7 @@ import re
 
 from config import create_api, get_config
 from chip import Chip
+from quote import random_quote
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
@@ -78,7 +79,7 @@ class TweetStreamListener(tweepy.StreamListener):
             media_ids.append(media_obj.media_id)
         
         self.api.update_status(
-            status=f"Congratulations @{tweet.user.screen_name}!",
+            status=f"Congratulations @{tweet.user.screen_name}!\n\n{random_quote()}",
             media_ids=media_ids,
             in_reply_to_status_id=tweet.id
         )
